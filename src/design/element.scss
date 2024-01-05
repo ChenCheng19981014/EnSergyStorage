@@ -1,0 +1,110 @@
+//element 重置样式
+
+.el-checkbox {
+  background: none;
+
+  .el-checkbox__input {
+    background: none;
+
+    .el-checkbox__inner {
+      background: none;
+      border: 1px solid rgba(19, 242, 236, 1);
+      border: 1px solid rgb(255, 255, 255, 0.7);
+    }
+  }
+
+  .is-checked {
+    .el-checkbox__inner {
+      border: 1px solid rgba(19, 242, 236, 1);
+    }
+  }
+}
+
+
+.el-input__inner[type="password"] {
+    letter-spacing: -5px;
+  }
+
+
+.el-notification {
+  background: black;
+}
+
+.el-pagination {
+  button {
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  .number,
+  .more {
+    color: white !important;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    &:hover {
+      color: white !important;
+    }
+  }
+  .active {
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(0, 102, 255, 0.5);
+    box-shadow: 0px 0px 8px 4px #06f inset !important;
+  }
+
+  button[disabled="disabled"] {
+    border: none;
+    i {
+      color: rgba(255, 255, 255, 0.1) !important;
+    }
+  }
+}
+
+.el-dropdown-menu {
+  max-height: 230px;
+  overflow-y: auto;
+  background: rgba(29, 57, 83, 0.9);
+  border: 1px solid #00ffe0;
+  // padding-left: 5px;
+  // padding-right: 5px;
+  width: 120px !important;
+
+  .el-dropdown-menu__item {
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0;
+    text-align: center;
+    font-size: 12px !important;
+    &:hover {
+      color: white;
+      background: rgba(0, 255, 224, 0.1);
+    }
+  }
+}
+
+.popper__arrow::after {
+  border-bottom-color: #00ffe0 !important;
+  margin-top: -2px;
+}
+
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
