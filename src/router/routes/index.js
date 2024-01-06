@@ -16,8 +16,8 @@ export default [
   },
 
   {
-    path: "/tabel",
-    name: "tabel",
-    component: () => import("@/views/tabel/index.vue"),
+    path: "/echarts",
+    name: "echarts",
+    component: () => import("@/views/echarts/index.vue"),
   },
 ];

@@ -11,12 +11,15 @@ import App from "./App.vue";
 // import plugin from "./plugins/index";
 import { HoverPopup } from "./directive/index";
 import { pinia } from "@/pinia";
-import "@arco-design/web-vue/dist/arco.css";
-import ArcoVue from "@arco-design/web-vue";
 // @ts-ignore
 import SvgIcon from "@/components/SvgIcon/index.vue"; // svg组件
+import { Message } from "@arco-design/web-vue";
+
+import "@arco-design/web-vue/dist/arco.css";
+import ArcoVue from "@arco-design/web-vue";
 const app = createApp(App);
 
+Message._context = app._context;
 app.use(ArcoVue);
 app.use(ElementPlus);
 app.use(component);

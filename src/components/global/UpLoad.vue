@@ -14,13 +14,14 @@
     font-size: 36px;
     font-style: normal;
     font-weight: 600;
-    line-height: 44px; /* 122.222% */
+    line-height: 44px;
+    /* 122.222% */
   }
 
   .upload-arco {
     margin-top: 80px;
     width: 100%;
-    height: 244px;
+    // height: 244px;
   }
 
   .upload-submit {
@@ -32,6 +33,7 @@
 </style>
 
 <style lang="scss">
+// 确认提交 按钮
 .upload-submit .arco-btn {
   width: 100%;
   height: 100%;
@@ -71,34 +73,70 @@
     background-color: rgb(78, 89, 105);
   }
 }
+
+.upload-submit .submit-btn {
+  background: #94bfff;
+  color: #fff;
+  font-size: 14px;
+  &:hover {
+    color: #fff;
+    cursor: not-allowed;
+    background: #94bfff;
+  }
+}
+
+.upload-submit .submit-btn:active {
+  background: #94bfff;
+  color: #fff;
+}
+
+.upload-submit .can-submit:active {
+  background: #0e42d2 !important;
+  color: #fff;
+}
+
+.upload-submit .can-submit {
+  background: #165dff;
+  color: #fff;
+  &:hover {
+    color: #fff;
+    background: #4080ff;
+  }
+}
 </style>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { PiniaTableInfo } from "@/pinia/table";
+import { ref, onMounted, registerRuntimeCompiler } from "vue";
 import * as XLSX from "xlsx";
-// 表格表头配置数组
-const tableColumn = ref([]) as any;
-// 合并单元格信息
-const mergedCells = ref([]) as any;
+import { gsap } from "gsap";
+import { Message } from "@arco-design/web-vue";
+const router = useRouter();
 //文件列表
-const fileList = ref([]);
+const fileList = ref<HTMLInputElement[]>([]);
 // 当前的选中的文件
-const file = ref();
+const file = ref<HTMLInputElement>();
+// 存储的数据
+const tableInfo = ref(null) as any;
 
-//导入表格
-const importExcel = (files) => {
+// 上传是否成功
+const upLoadSuccess = ref(false);
 
-  const fileName = files[0].name.includes(".xlsx")
-    ? files[0].name.replace(".xlsx", "")
-    : files[0].name.replace(".xls", "");
-  console.log("文件名称：", fileName);
+//  导入表格 功能
+const importExcel = (file: HTMLInputElement | any) => {
+  //  文件存储
+  fileList.value.push(file);
+  // 取文件名称
+  const fileName = file.name.includes(".xlsx")
+    ? file.name.replace(".xlsx", "")
+    : file.name.replace(".xls", "");
 
-  if (!files.length) {
-    return;
-  } else if (!/\.(xls|xlsx|csv)$/.test(files[0].name.toLowerCase())) {
-    return alert("上传格式不正确，请上传xls或者xlsx格式");
-  }
+  // 文件读取器
   const fileReader = new FileReader();
+
+  // console.log("file:", file);
+
   fileReader.onload = (ev: any) => {
     try {
       const data = ev.target.result;
@@ -116,34 +154,117 @@ const importExcel = (files) => {
         excellist.push(ws[i]);
       }
 
-      console.log("第一个表名：", wsname, "\n读取结果", excellist); // 此时得到的是一个内容是对象的数组需要处理
-
       // 获取表头2-1
       const sheet = workbook.Sheets[wsname];
 
-      // console.log(workbook, sheet, headers, "sheet---");
+      console.log(
+        // "第一个表名：",
+        // wsname,
+        "\n读取结果",
+        excellist
+        // "\n表信息：",
+        // sheet
+      );
+
+      // 更新信息shuju
+      tableInfo.value = excellist;
+
+      // 更新 pinia中表的数据
+      PiniaTableInfo().refleshTableInfo(tableInfo.value);
+
+      // console.log("PiniaTableInfo:", PiniaTableInfo);
 
       // 渲染表格1-2
     } catch (e) {
       return alert("读取失败!");
     }
   };
+
+  const blob = new Blob([file], { type: file.type });
+  // 读取xlsx表格数据
+  fileReader.readAsBinaryString(blob);
 };
 
-// 进度
-const onProgress = (currentFile) => {
-  file.value = currentFile;
+// 上传文件 之前
+const onBeforeUpload = (file: HTMLInputElement | any) => {
+  if (!/\.(xls|xlsx|csv)$/.test(file.name.toLowerCase())) {
+    Message.error({
+      id: "upLoadError",
+      content: `上传格式不正确，请上传xls或xlsx或csv格式`,
+      duration: 3000,
+    });
+    return false;
+  } else {
+    return true;
+  }
 };
 
-// 上传文件之前
-const beforeUpload = (file) => {
-  importExcel(file);
-  return false;
+// 移除 时 (之前 )触发
+const onBeforeRemove = () => {
+  // 重置 上传按钮的 状态
+  upLoadSuccess.value = false;
+
+  // 更新 pinia中表的数据
+  PiniaTableInfo().refleshTableInfo([]);
+
+  return true;
 };
 
-// 移除文件前触发
-const onBeforeRemove = (file: any) => {
-  console.log("文件:", file);
+// 自定义上传请求
+const customRequest = (option) => {
+  const { onProgress, onError, onSuccess, fileItem, name } = option;
+
+  console.log("自定义上传请求:", option);
+
+  // 重置 上传按钮的 状态
+  upLoadSuccess.value = false;
+  // 创建一个补帧动画
+  const animation = gsap.to(
+    {},
+    {
+      duration: 1,
+
+      onUpdate: function () {
+        const progress = this.progress();
+        // 进度
+        onProgress(progress);
+        // 在这里处理每一帧更新时的逻辑
+      },
+      onComplete: function () {
+        //导入数据
+        importExcel(fileItem.file);
+
+        // 上传成功
+        upLoadSuccess.value = true;
+
+        //上传成功
+        onSuccess();
+
+        Message.success({
+          id: "upLoadSuccess",
+          content: `上传读取完毕 可提交表单`,
+          duration: 3000,
+        });
+      },
+    }
+  );
+
+  // 开始补帧动画
+  animation.play();
+};
+
+// 提交 表单信息
+const uploadData = () => {
+  if (upLoadSuccess.value) {
+    //跳转
+    router.push("/echarts");
+  } else {
+    Message.error({
+      id: "upLoadError",
+      content: `请先上传Excel文件再提交`,
+      duration: 3000,
+    });
+  }
 };
 
 onMounted(() => {});
@@ -151,27 +272,28 @@ onMounted(() => {});
 
 <template>
   <div class="upload">
-    <svg-icon class-name="size-icon" icon-class="size" />
-
     <!-- 名称 -->
     <div class="title">储能图表生成器</div>
 
     <!-- 上传模块 -->
     <div class="upload-arco">
       <a-upload
-        :multiple="false"
         draggable
-        @success="importExcel"
-        @progress="onProgress"
-        @on-before-remove="onBeforeRemove"
-        @before-upload="beforeUpload"
-        :default-file-list="fileList"
+        :multiple="false"
+        :custom-request="customRequest"
+        :on-before-remove="onBeforeRemove"
+        :on-before-upload="onBeforeUpload"
+        @default-file-list="fileList"
       />
     </div>
 
     <!-- 提交按钮 -->
     <div class="upload-submit">
-      <a-button type="primary">生成表单</a-button>
+      <a-button
+        @click="uploadData"
+        :class="`${upLoadSuccess ? 'can-submit' : 'submit-btn'}`"
+        >生成表单</a-button
+      >
     </div>
   </div>
 </template>

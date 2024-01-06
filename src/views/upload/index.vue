@@ -17,7 +17,6 @@
 
   .index-upload {
     width: 400px;
-    height: 440px;
     transform: translate(-50%, -50%);
     left: 50%;
     top: 50%;
@@ -27,12 +26,10 @@
 </style>
 
 <style lang="scss">
-
 // 上传反馈栏
-.upload-arco .arco-upload-list{
+.upload-arco .arco-upload-list {
   width: 424px !important;
 }
-
 </style>
 
 <script setup lang="ts">
