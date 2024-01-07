@@ -8,14 +8,15 @@
 
   .echarts-content {
     width: 100%;
+    height: auto;
     padding-left: 40px;
     padding-right: 40px;
     padding-bottom: 52px;
   }
 
-  .echarts-content :nth-child(2) {
-    margin-top: 0px;
-  }
+  // .echarts-content :nth-child(2) {
+  //   margin-top: 0px;
+  // }
 }
 </style>
 
