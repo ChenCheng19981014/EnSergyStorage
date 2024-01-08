@@ -45,7 +45,7 @@
 
   .title {
     font-family: "SourceHanSansCN";
-    color: #86909c;
+    color: #1D2129;
     font-size: 16px;
     font-style: normal;
     font-weight: 500;
@@ -60,12 +60,14 @@
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, toRefs } from "vue";
 const router = useRouter();
 // 返回上传页面
 const backToUpLoad = () => {
   router.push("/upload");
 };
+const props = defineProps(["company"]);
+const { company } = toRefs(props);
 </script>
 
 <template>
@@ -90,6 +92,6 @@ const backToUpLoad = () => {
       <div class="txt">返回</div>
     </div>
 
-    <div class="title">新界泵业（杭州）有限公司</div>
+    <div class="title">{{ company }}</div>
   </div>
 </template>

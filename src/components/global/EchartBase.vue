@@ -14,6 +14,7 @@ export default {
       autoLoopIndex: 0,
     };
   },
+
   props: {
     options: {
       type: Object,
@@ -22,15 +23,19 @@ export default {
       },
     },
     loading: Boolean,
+
     changeClear: {
       type: Boolean,
       default: true,
     },
+
     delay: Number,
+
     active: {
       type: Boolean,
       default: true,
     },
+
     tooltipType: {
       type: Object,
       default: () => ({
@@ -38,7 +43,9 @@ export default {
         eventName: "",
       }),
     },
+
     zoomLength: { type: Number, default: 7 },
+
     loadingStyle: {
       type: Object,
       default: () => ({
@@ -56,101 +63,27 @@ export default {
         lineWidth: 8,
       }),
     },
+
     devicePixelRatio: { type: Number, default: 1 },
   },
-  methods: {
-    initChart() {
-      const _this = this;
-      window.addEventListener("resize", _this.resizeChart);
-      if (this.$refs.chart_base) {
-        // console.log('.............:', this.options)
-        this.instance = ec.init(
-          this.$refs.chart_base,
-          {
-            theme: "macarons",
-            // textStyle: {
-            // 	fontSize: 38,
-            // },
-            ...(this.options || {}),
-          },
-          { devicePixelRatio: this.devicePixelRatio }
-        );
-        if (this.loading) {
-          this.instance.showLoading(this.loadingStyle);
-        }
-      }
-    },
-    resizeChart() {
-      // console.log("sl-main-size-change")
-      if (!this.active) {
-        return;
-      }
-      this.$nextTick(() => {
-        setTimeout(() => {
-          if (this.instance) {
-            // console.log("sl-main-size-change resize")
-            this.instance.resize();
-          }
-        }, 2000);
-      });
-    },
-    refreshChart() {
-      // if(!this.active){
-      //   return
-      // }
-      if (this.isWaiting) {
-        return;
-      }
-      if (this.instance) {
-        if (this.changeClear) {
-          // this.instance.clear();
-        }
-        this.instance.setOption(this.options);
-      }
-      // console.log('refreshChart')
-      // console.log(this.options)
-    },
-    changeTooltip() {
-      this.$nextTick(() => {
-        if (this.instance) {
-          let dataLen =
-            this.tooltipType.type === "data"
-              ? this.options.series[0] &&
-                this.options.series[0].data &&
-                this.options.series[0].data.length
-              : this.options.series.length;
-          if (!dataLen) {
-            dataLen = 1;
-          }
-          this.tooltipCurrentIndex = (this.tooltipCurrentIndex + 1) % dataLen;
-        }
-      });
-    },
-    autoTooltip() {
-      if (this.tooltipType.type) {
-        this.$eventBus.$on(
-          this.tooltipType.eventName || "chart-tooltip",
-          this.changeTooltip
-        );
-      }
-    },
-  },
-  mounted() {
-    this.initChart();
-    this.isWaiting = true;
-    setTimeout(() => {
-      this.isWaiting = false;
-      this.refreshChart();
-    }, this.delay);
-    this.autoTooltip();
-  },
+
   watch: {
+
+    options: {
+      deep: true,
+      handler() {
+        this.refreshChart();
+      },
+    },
+
+    // 当前提示框
     tooltipCurrentIndex(v, oldV) {
       if (this.instance) {
         const total =
           this.options.series[0] &&
           this.options.series[0].data &&
           this.options.series[0].data.length;
+
         if (this.zoomLength < total && total > 1) {
           const step = 100 / total;
           const start = v + 1 - this.zoomLength;
@@ -181,11 +114,11 @@ export default {
         }, 500);
       }
     },
+
     active(v) {
-      if (v) {
-        this.resizeChart();
-      }
+      if (v) this.resizeChart();
     },
+
     loading(v) {
       if (v) {
         this.instance && this.instance.showLoading(this.loadingStyle);
@@ -193,13 +126,85 @@ export default {
         this.instance && this.instance.hideLoading();
       }
     },
-    options: {
-      deep: true,
-      handler() {
-        this.refreshChart();
-      },
+  },
+
+  methods: {
+    // 初始化
+    initChart() {
+      const _this = this;
+      window.addEventListener("resize", _this.resizeChart);
+      if (this.$refs.chart_base) {
+        this.instance = ec.init(
+          this.$refs.chart_base,
+          {
+            theme: "macarons",
+            ...(this.options || {}),
+          },
+          { devicePixelRatio: this.devicePixelRatio }
+        );
+        if (this.loading) {
+          this.instance.showLoading(this.loadingStyle);
+        }
+      }
+    },
+
+    // 更新数据
+    refreshChart() {
+      if (this.isWaiting) return;
+      if (this.instance)  this.instance.setOption(this.options);
+    },
+
+    // 重置数据
+    resizeChart() {
+      if (!this.active) return;
+      this.$nextTick(() => {
+        setTimeout(() => {
+          if (this.instance) this.instance.resize();
+        }, 2000);
+      });
+    },
+
+    changeTooltip() {
+      this.$nextTick(() => {
+        if (this.instance) {
+          let dataLen =
+            this.tooltipType.type === "data"
+              ? this.options.series[0] &&
+                this.options.series[0].data &&
+                this.options.series[0].data.length
+              : this.options.series.length;
+          if (!dataLen) {
+            dataLen = 1;
+          }
+          this.tooltipCurrentIndex = (this.tooltipCurrentIndex + 1) % dataLen;
+        }
+      });
+    },
+
+    autoTooltip() {
+      if (this.tooltipType.type) {
+        this.$eventBus.$on(
+          this.tooltipType.eventName || "chart-tooltip",
+          this.changeTooltip
+        );
+      }
     },
   },
+
+  mounted() {
+    this.initChart();
+
+    this.isWaiting = true;
+
+    setTimeout(() => {
+      this.isWaiting = false;
+
+      this.refreshChart();
+    }, this.delay);
+
+    this.autoTooltip();
+  },
+
   beforeDestroy() {
     const _this = this;
     if (this.tooltipTimer) {
@@ -217,6 +222,7 @@ export default {
     this.instance && this.instance.dispose();
     this.instance = null;
   },
+
   echarts: ec,
 };
 </script>

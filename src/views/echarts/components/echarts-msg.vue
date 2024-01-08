@@ -45,8 +45,10 @@ import { ref, onMounted, toRefs } from "vue";
 
 // 拿到 标题的 信息
 const props = defineProps(["messageInfo"]);
+
 const { messageInfo } = toRefs(props);
-console.log("messageInfo:", messageInfo);
+
+// console.log("messageInfo:", messageInfo);
 onMounted(() => {});
 </script>
 

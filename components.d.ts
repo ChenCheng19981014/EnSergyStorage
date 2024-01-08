@@ -8,23 +8,14 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ChartBase: typeof import('./src/components/global/ChartBase.vue')['default']
-    copy: typeof import('./src/components/global/logo copy.vue')['default']
-    DomTree: typeof import('./src/components/global/dom-tree.vue')['default']
-    Echarts1: typeof import('./src/components/global/echarts1.vue')['default']
-    El1: typeof import('./src/components/global/el1.vue')['default']
-    Global: typeof import('./src/components/global/index.vue')['default']
+    copy: typeof import('./src/components/global/EchartBase copy.vue')['default']
+    EchartBase: typeof import('./src/components/global/EchartBase.vue')['default']
+    EchartDrag: typeof import('./src/components/global/Echart-Drag.vue')['default']
     Logo: typeof import('./src/components/global/Logo.vue')['default']
-    MachineError: typeof import('./src/components/global/machine-error.vue')['default']
-    OnlineNumber: typeof import('./src/components/global/online-number.vue')['default']
-    OverallFooter: typeof import('./src/components/global/overall-footer.vue')['default']
-    OverallHeader: typeof import('./src/components/global/overall-header.vue')['default']
     Picture: typeof import('./src/components/global/Picture.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    ScrollWrap: typeof import('./src/components/global/scroll-wrap.vue')['default']
     SvgIcon: typeof import('./src/components/global/SvgIcon.vue')['default']
-    Tags: typeof import('./src/components/global/tags.vue')['default']
-    TreeNode: typeof import('./src/components/global/treeNode.vue')['default']
     UpLoad: typeof import('./src/components/global/UpLoad.vue')['default']
   }
 }
