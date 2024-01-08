@@ -12,3 +12,8 @@ export const anima = (begin, end, time, onUpdate, onComplete) => {
     });
   return tween;
 };
+
+
+export const roundToNearest = (number, x) => {
+  return Math.ceil(number / x) * x;
+}

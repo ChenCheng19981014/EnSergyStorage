@@ -7,8 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    ChartBase: typeof import('./src/components/global/ChartBase.vue')['default']
-    copy: typeof import('./src/components/global/EchartBase copy.vue')['default']
     EchartBase: typeof import('./src/components/global/EchartBase.vue')['default']
     EchartDrag: typeof import('./src/components/global/Echart-Drag.vue')['default']
     Logo: typeof import('./src/components/global/Logo.vue')['default']
