@@ -1,6 +1,10 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-
+// @ts-ignore
+import IndexedDBCache from "@/utils/indexdb.js";
+// 初始化 db
+let db = new IndexedDBCache("linktwins");
+db.initDB();
 /**
  *  @Author: cc
  *  @description:  当前表格信息
@@ -9,12 +13,18 @@ import { ref } from "vue";
  */
 export const PiniaTableInfo = defineStore(
   "tableInfo",
-  () => {
+  async () => {
     // 当前的菜单信息 选项
     const tabelInfo = ref<any[]>([]);
 
-    const refleshTableInfo = (info: any[]) => {
-      tabelInfo.value = info;
+    const refleshTableInfo = async (info: any[]) => {
+      // tabelInfo.value = info;
+
+      await db.addData("PiniaTableInfo", JSON.stringify(info));
+
+      // console.log("更新数据", info);
+      // 更新持久化存储中的数据
+      // sessionStorage.setItem("PiniaTableInfo", JSON.stringify(info));
     };
 
     return {
