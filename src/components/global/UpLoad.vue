@@ -243,7 +243,7 @@ const customRequest = (option) => {
         Message.success({
           id: "upLoadSuccess",
           content: `上传读取完毕 可提交表单`,
-          duration: 3000,
+          duration: 4000,
         });
       },
     }

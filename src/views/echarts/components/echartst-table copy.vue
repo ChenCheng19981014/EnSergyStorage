@@ -193,7 +193,7 @@
   border-radius: 6px;
   height: 72px;
   border: 0.5px solid #fff;
-  width: 200px;
+  width: 180px;
   background: linear-gradient(304deg,
       rgba(253, 254, 255, 0.6) -6.04%,
       rgba(244, 247, 252, 0.6) 85.2%) !important;
@@ -226,7 +226,6 @@
     .ssyg {
       margin-top: 4px;
       width: 100%;
-      // width: 164px;
       height: 32px;
       display: flex;
       align-items: center;
@@ -239,108 +238,6 @@
         width: 10px;
         height: 10.002px;
         background-color: #249eff;
-        border-radius: 50%;
-        padding: 7px 8px;
-        margin-left: 8px;
-        @extend .flex-center;
-      }
-
-      .txt {
-        margin-left: 8px;
-        color: #4e5969;
-        font-family: "SourceHanSansCN";
-        font-size: 12px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 18px;
-        @extend .flex-center;
-      }
-
-      .value {
-        position: absolute;
-        right: 8px;
-        color: #1d2129;
-        text-align: right;
-        font-family: "SourceHanSansCN";
-        font-size: 13px;
-        font-style: normal;
-        font-weight: 500;
-        line-height: normal;
-        @extend .flex-center;
-      }
-    }
-  }
-}
-
-.echarts-tooltip-2 {
-  padding: 0.5 !important;
-  border: none !important;
-  border-radius: 6px;
-  height: 180px;
-  border: 0.5px solid #fff;
-  width: 218px;
-  background: linear-gradient(304deg,
-      rgba(253, 254, 255, 0.6) -6.04%,
-      rgba(244, 247, 252, 0.6) 85.2%) !important;
-  backdrop-filter: blur(5px);
-
-  // 给子盒子自定义样式
-  .custom-tooltip-style {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-
-    .date {
-      width: 100%;
-      height: 20px;
-      display: flex;
-      justify-content: start;
-      align-items: center;
-      color: #1d2129;
-      font-family: "SourceHanSansCN";
-      font-size: 12px;
-      font-style: normal;
-      font-weight: 500;
-      line-height: 20px;
-      margin-left: 4px;
-    }
-
-
-
-    .time1 .round {
-      background-color: #249eff;
-    }
-
-    .time2 .round {
-      background-color: #313CA9;
-    }
-
-    .time3 .round {
-      background-color: #249EFF;
-    }
-
-    .time4 .round {
-      background-color: #33D1C9;
-    }
-
-    .time-item {
-      margin-top: 4px;
-      width: 100%;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 6px 0px 20px 0px rgba(34, 87, 188, 0.1);
-      position: relative;
-
-
-      .round {
-        width: 10px;
-        height: 10.002px;
         border-radius: 50%;
         padding: 7px 8px;
         margin-left: 8px;
@@ -390,6 +287,7 @@ import {
 import domToImage from "dom-to-image";
 import * as echarts from "echarts";
 import { roundToNearest } from "@/utils/tools.js";
+
 // 显示的时间
 const showTimeList = ref([
   {
@@ -413,43 +311,45 @@ const showTimeList = ref([
     frame: ['07:00:00', '08:00:00']
   },
 ]);
-const echarts1 = ref(null); // echatrs1 dom
-const echarts2 = ref(null); // echatrs2 dom
 
-// 拿到 标题的 信息  父组件传值
+const echarts1 = ref(null);
+const echarts2 = ref(null);
+// 拿到 标题的 信息
 const props = defineProps(["tableInfo", "id"]);
 
 // 表信息  和  表头信息
 const { tableInfo, id } = toRefs(props);
 
-// 选择时间节点  log
+// 选择时间节点
 // console.log("tableInfo:", id?.value, tableInfo?.value);
 
-// 表一数据 
-let echarts1Data = reactive({});
+let echarts2OptionsData = ref([]) as any;
+
+// 表数据 不变
+let echartsData = reactive({});
 
 // 表格1 实例
 let myChart1 = reactive({}) as any;
 // 表格2 实例
 let myChart2 = reactive({}) as any;
 
-// 第二个表格的series data数据
+// 第二个表格的options数据
 let echatrsOptionsData = reactive({});
 
-// 选择的时间 默认是全部的时间
+// 选择的时间
 let selectedData = reactive({
   data1: [tableInfo?.value.time.startTime, tableInfo?.value.time.endTime],
   data2: [tableInfo?.value.time.startTime, tableInfo?.value.time.endTime],
 });
 
-// 取到表一所需要的数据  使用了以时间为键的reduce方法进行排序
-echarts1Data = tableInfo?.value.data.reduce((acc, obj) => {
+// 取到表一所需要的数据
+echartsData = tableInfo?.value.data.reduce((acc, obj) => {
   const date = obj.time.split(" ")[0]; // 提取日期部分
   acc[date] = (acc[date] || 0) + parseFloat(obj.InstantaneousActivePower);
   return acc;
 }, {});
 
-// 表一的 配置
+// 表一数据
 const options1 = reactive<any>({
   // 提示框
   tooltip: {
@@ -487,7 +387,7 @@ const options1 = reactive<any>({
           <div class='ssyg'>
               <div class='round'></div>
               <div class='txt'>瞬时有功</div>
-              <div class='value'> ${params[0].data.toFixed(4)} </div>
+              <div class='value'> ${params[0].data.toFixed(2)} </div>
           </div>
         </div>`;
       return htmlText;
@@ -547,7 +447,7 @@ const options1 = reactive<any>({
         align: "center",
         verticalAlign: "middle",
       },
-      data: Object.keys(echarts1Data),
+      data: Object.keys(echartsData),
       boundaryGap: false, // 不留白，从原点开始
     },
   ],
@@ -585,7 +485,6 @@ const options1 = reactive<any>({
 
   series: [
     {
-      smooth:true,
       symbolSize: 5, // 折线点的大小
       showSymbol: false, //关闭线上默认的圆点
       itemStyle: {
@@ -608,13 +507,12 @@ const options1 = reactive<any>({
         },
       },
       type: "line",
-      data: Object.values(echarts1Data),
+      data: Object.values(echartsData),
     },
   ],
 });
 
-// 表二的 配置
-const options2 = reactive<any>({
+let options2 = reactive<any>({
   // 提示框
   tooltip: {
     trigger: "axis",
@@ -642,31 +540,15 @@ const options2 = reactive<any>({
         width: 2,
       },
     },
-    className: "echarts-tooltip-2",
+    className: "echarts-tooltip-1",
     formatter: function (params, elOne, elTwo) {
-      // 循环处理数据，展示数据
       var htmlText = `
       <div class='custom-tooltip-style'>
           <div class='date'>${params[0].axisValue}</div>
-          <div class='time-item time1'>
+          <div class='ssyg'>
               <div class='round'></div>
-              <div class='txt'>${params[0].seriesName}</div>
-              <div class='value'> ${params[0].data.toFixed(4)} </div>
-          </div>
-          <div class='time-item time2'>
-              <div class='round'></div>
-              <div class='txt'>${params[1].seriesName}</div>
-              <div class='value'> ${params[1].data.toFixed(4)} </div>
-          </div>
-          <div class='time-item time3'>
-              <div class='round'></div>
-              <div class='txt'>${params[2].seriesName}</div>
-              <div class='value'> ${params[2].data.toFixed(4)} </div>
-          </div>
-          <div class='time-item time4'>
-              <div class='round'></div>
-              <div class='txt'>${params[3].seriesName}</div>
-              <div class='value'> ${params[3].data.toFixed(4)} </div>
+              <div class='txt'>瞬时有功</div>
+              <div class='value'> ${params[0].data.toFixed(2)} </div>
           </div>
         </div>`;
       return htmlText;
@@ -726,7 +608,7 @@ const options2 = reactive<any>({
         align: "center",
         verticalAlign: "middle",
       },
-      data: Object.keys(echarts1Data), // 初始化时 使用和表一一样的数据
+      data: Object.keys(echartsData),
       boundaryGap: false, // 不留白，从原点开始
     },
   ],
@@ -742,6 +624,7 @@ const options2 = reactive<any>({
       },
 
       type: "value",
+      // max: Math.ceil(Math.max(...Object.values(echarts1OptionsDate)) * 2),
       splitLine: {
         show: true,
         lineStyle: {
@@ -761,11 +644,36 @@ const options2 = reactive<any>({
     },
   ],
 
-  series: [],  // 只能后期自行添加
+  series: [{
+    symbolSize: 5, // 折线点的大小
+    showSymbol: false, //关闭线上默认的圆点
+    itemStyle: {
+      normal: {
+        color: "rgba(0,0,0,0);", // 改变折线点的颜色
+        borderWidth: 0,
+        lineStyle: {
+          color: "#249EFF", //改变折线的颜色
+        },
+      },
+    },
+    emphasis: {
+      // 鼠标hover上去的时候，拐点的颜色和样式
+      itemStyle: {
+        color: "#0072FF", //颜色
+        borderColor: "#fff", //图形的描边颜色
+        borderWidth: 2, // 描边的线宽
+        shadowBlur: 4, // 图形的阴影大小
+        shadowColor: "#0072FF", // 图形的阴影颜色
+      },
+    },
+    type: "line",
+    data: Object.values(echartsData),
+  },],
 });
 
 // 初始化表格
 const initEcahrts = () => {
+
   if (!echarts1.value || !echarts2.value) return;
 
   myChart1 = echarts.init(echarts1.value);
@@ -778,74 +686,7 @@ const initEcahrts = () => {
   window.addEventListener("resize", myChart2.resize);
 };
 
-// 初始化数据 表二
-const initDataAboutEcharts2 = () => {
-  // 从pinia中取出信息
-  const { data } = tableInfo?.value;
-  // 分组信息
-  const groupedData = grouping(data);
-  // 共4个 时间段
-  showTimeList.value.map((listInfo) => {
-    // 显示的时间段信息
-    const { timeFrame, frame } = listInfo;
-    // 获取对应时间段的数据
-    echatrsOptionsData[timeFrame] = getDataByTimeRange(groupedData, frame[0], frame[1]);
-  })
-
-  // 初始化第二组表的配置项
-  initEcahrts2Options(echatrsOptionsData);
-
-  // console.log("时间分组数据:", echatrsOptionsData);
-};
-
-// 初始化第二项 表单数据  时间段为key value为 { '2023-01-03':720.3 }
-const initEcahrts2Options = (echatrsOptionsData) => {
-  // y轴数值
-  let seriesData = [] as any;
-  Object.keys(echatrsOptionsData).map((time, index) => {
-    const data = echatrsOptionsData[time];
-    const { color, timeFrame } = showTimeList.value[index];
-    // 添加颜色和对应的 时间段的数值
-    seriesData.push({
-      smooth:true,
-      name: timeFrame,
-      symbolSize: 5, // 折线点的大小
-      showSymbol: false, //关闭线上默认的圆点
-      itemStyle: {
-        normal: {
-          color: "rgba(0,0,0,0);", // 改变折线点的颜色
-          borderWidth: 0,
-          lineStyle: {
-            color: color, //改变折线的颜色
-          },
-        },
-      },
-      emphasis: {
-        // 鼠标hover上去的时候，拐点的颜色和样式
-        itemStyle: {
-          color: color, //颜色
-          borderColor: "#fff", //图形的描边颜色
-          borderWidth: 2, // 描边的线宽
-          shadowBlur: 4, // 图形的阴影大小
-          shadowColor: color, // 图形的阴影颜色
-        },
-      },
-      type: "line",
-      data: Object.values(data),
-    })
-  })
-
-  // 赋值 数据
-  options2.series = seriesData;
-}
-
-
-/**
-*  @Author: cc
-*  @description:  分组 拿到所有的日期 使用日期进行分类
-*  @param {  接受一个数组对象 包含日期信息 }
-*  @return { 返回一个数组对象 按照日期进行分类  }
-*/
+// 分组
 const grouping = (data) => {
   return data.reduce((result, item) => {
     const date = item.time.split(" ")[0]; // 提取日期部分
@@ -877,13 +718,250 @@ const getDataByTimeRange = (data, startTime, endTime) => {
   return result;
 }
 
-// 确认过滤时间 表一
-const onOk1 = (selectedArr: string[] | any[]) => {
+// 初始化数据
+const initData = () => {
+  // 表信息
+  const { data, time } = tableInfo?.value;
+  // 分组信息
+  const groupedData = grouping(data);
+
+  showTimeList.value.map((listInfo) => {
+    // 显示的时间段信息
+    const { timeFrame, frame } = listInfo;
+    // 获取对应时间段的数据
+    echatrsOptionsData[timeFrame] = getDataByTimeRange(groupedData, frame[0], frame[1]);
+  })
+
+  // 初始化第二组表的配置项
+  initEcahrts2Options(echatrsOptionsData);
+
+  console.log("时间分组数据:", echatrsOptionsData,);
+
+};
+
+// 初始化第二项 表单数据
+const initEcahrts2Options = (echatrsOptionsData) => {
+  const instance = getCurrentInstance();
+  options2.series = []
+  // 信息
+  let series = [] as any;
+  Object.keys(echatrsOptionsData).map((time, index) => {
+    const data = echatrsOptionsData[time];
+    const { color } = showTimeList.value[index];
+
+    series.push({
+      symbolSize: 5, // 折线点的大小
+      showSymbol: false, //关闭线上默认的圆点
+      itemStyle: {
+        normal: {
+          color: "rgba(0,0,0,0);", // 改变折线点的颜色
+          borderWidth: 0,
+          lineStyle: {
+            color: color, //改变折线的颜色
+          },
+        },
+      },
+      emphasis: {
+        // 鼠标hover上去的时候，拐点的颜色和样式
+        itemStyle: {
+          color: color, //颜色
+          borderColor: "#fff", //图形的描边颜色
+          borderWidth: 2, // 描边的线宽
+          shadowBlur: 4, // 图形的阴影大小
+          shadowColor: color, // 图形的阴影颜色
+        },
+      },
+      type: "line",
+      data: data,
+    })
+
+    echarts2OptionsData.value.push({
+      symbolSize: 5, // 折线点的大小
+      showSymbol: false, //关闭线上默认的圆点
+      itemStyle: {
+        normal: {
+          color: "rgba(0,0,0,0);", // 改变折线点的颜色
+          borderWidth: 0,
+          lineStyle: {
+            color: color, //改变折线的颜色
+          },
+        },
+      },
+      emphasis: {
+        // 鼠标hover上去的时候，拐点的颜色和样式
+        itemStyle: {
+          color: color, //颜色
+          borderColor: "#fff", //图形的描边颜色
+          borderWidth: 2, // 描边的线宽
+          shadowBlur: 4, // 图形的阴影大小
+          shadowColor: color, // 图形的阴影颜色
+        },
+      },
+      type: "line",
+      data: data,
+    })
+  })
+
+
+  options2 = {
+    // 提示框
+    tooltip: {
+      trigger: "axis",
+      position: function (point, params, dom, rect, size) {
+
+        var x = point[0]; // x坐标位置
+        var y = point[1]; // y坐标位置
+
+        var boxWidth = size.contentSize[0]; // 提示框宽度
+        var boxHeight = size.contentSize[1]; // 提示框高度
+
+        x = x + 10; // 设置x坐标位置为鼠标横坐标减去提示框宽度
+        y = y - boxHeight - 10; // 设置y坐标位置为鼠标纵坐标加上一个偏移值
+
+        if (x > 1500) {
+          x = x - boxWidth - 10;
+        }
+
+        return [x, y];
+      },
+      axisPointer: {
+        type: "none",
+        lineStyle: {
+          color: "#00FFE0",
+          width: 2,
+        },
+      },
+      className: "echarts-tooltip-1",
+      formatter: function (params, elOne, elTwo) {
+        var htmlText = `
+      <div class='custom-tooltip-style'>
+          <div class='date'>${params[0].axisValue}</div>
+          <div class='ssyg'>
+              <div class='round'></div>
+              <div class='txt'>瞬时有功</div>
+              <div class='value'> ${params[0].data.toFixed(2)} </div>
+          </div>
+        </div>`;
+        return htmlText;
+      },
+    },
+
+    // 缩放配置
+    dataZoom: [
+      {
+        show: true,
+        realtime: true,
+        start: 0,
+        end: 50,
+        xAxisIndex: [0, 1],
+        height: 14,
+        bottom: 10,
+      },
+      {
+        type: "inside",
+        realtime: true,
+        start: 0,
+        end: 50,
+        xAxisIndex: [0, 1],
+        height: 14,
+        bottom: 10,
+      },
+    ],
+
+    xAxis: [
+      {
+        // x轴的线
+        axisLine: {
+          onZero: true,
+          // symbolOffset: [0, 500],
+          lineStyle: {
+            width: 2, // 控制刻度线粗细
+            height: 0.725,
+            color: "#A9AEB8",
+          },
+        },
+
+        // 向下的刻度
+        axisTick: {
+          alignWithLabel: true,
+          length: 5, // 控制刻度线长度
+          lineStyle: {
+            width: 2, // 控制刻度线粗细
+            color: "#A9AEB8",
+          },
+        },
+
+        /*坐标轴名字向左偏移begin*/
+        axisLabel: {
+          color: "#A9AEB8",
+          fontFamily: "SourceHanSansCN",
+          margin: 20,
+          align: "center",
+          verticalAlign: "middle",
+        },
+        data: Object.keys(echartsData),
+        boundaryGap: false, // 不留白，从原点开始
+      },
+    ],
+
+    yAxis: [
+      {
+        // y轴的线
+        axisLine: {
+          onZero: true,
+          lineStyle: {
+            color: "#A9AEB8",
+          },
+        },
+
+        type: "value",
+        // max: Math.ceil(Math.max(...Object.values(echarts1OptionsDate)) * 2),
+        splitLine: {
+          show: true,
+          lineStyle: {
+            type: "dashed",
+          },
+        },
+      },
+    ],
+
+    grid: [
+      {
+        top: 10,
+        left: 70,
+        right: 0,
+        bottom: 0,
+        height: "75%",
+      },
+    ],
+
+    series: series,
+  }
+
+
+  options2.series = series;
+}
+
+// 过滤第一个表
+const filterEcharts1 = (data, startDate, endDate) => {
+  const result = {};
+  for (const date in data) {
+    if (date >= startDate && date <= endDate) {
+      result[date] = data[date];
+    }
+  }
+  return result;
+};
+
+// 过滤第二个表
+const filterEcharts2 = (data, startDate, endDate) => { };
+
+// 确认过滤时间
+const onOk1 = (selectedArr: string[]) => {
   const startDate = selectedArr[0].split(" ")[0]; // 开始时间
   const endDate = selectedArr[1].split(" ")[0]; // 结束时间
-  // console.log('echartsData:', echarts1Data);
   // 过滤出 指定时间内的数据
-  const selectedData = filterEchartsDate(echarts1Data, startDate, endDate);
+  const selectedData = filterEcharts1(echartsData, startDate, endDate);
   // 修改option的值
   options1.xAxis[0].data = Object.keys(selectedData);
   options1.series[0].data = Object.values(selectedData);
@@ -894,65 +972,32 @@ const onOk1 = (selectedArr: string[] | any[]) => {
   console.log("onOk1:", selectedData, startDate, endDate);
 };
 
-// 确认过滤时间 表二
-const onOk2 = (selectedArr: string[] | any[]) => {
-  // x轴的值
-  let xAxisKey: string[] = [];
+const onOk2 = (selectedArr: string[]) => {
   const startDate = selectedArr[0].split(" ")[0]; // 开始时间
   const endDate = selectedArr[1].split(" ")[0]; // 结束时间
-
-  Object.keys(echatrsOptionsData).map((timeFrame, index) => {
-    const dateInfoMap = echatrsOptionsData[timeFrame];
-
-    // 过滤出 指定时间内的数据
-    const selectedData = filterEchartsDate(dateInfoMap, startDate, endDate);
-
-    // 修改echarts2 options series的data值
-    options2.series[index].data = Object.values(selectedData);
-  
-    // 获取x轴最新的数组值  key 日期给x轴
-    if (xAxisKey.length > 0) return
-
-    xAxisKey.push(...Object.keys(selectedData));
-  })
-
-  // 更新日期
-  options2.xAxis[0].data = xAxisKey; // 赋值 x轴的值
+  // 过滤出 指定时间内的数据
+  const selectedData = filterEcharts1(echartsData, startDate, endDate);
+  // 修改option的值
+  options2.xAxis[0].data = Object.keys(selectedData);
+  options2.series[0].data = Object.values(selectedData);
 
   // 重置刷新echatrs
   myChart2.setOption(options2);
 
-  // console.log('表二确认:', startDate, endDate,'选中日期:', xAxisKey);
+  console.log("onOk2:", selectedData, startDate, endDate);
 };
 
-// 初始
+onBeforeMount(() => {
+})
+
 onMounted(() => {
-  // 初始化数据
-  initDataAboutEcharts2();
-  // 初始化echatrs
+
+  initData();
+
+
   initEcahrts();
-});
 
-// 销毁
-onBeforeUnmount(() => {
-  destroyChart();
 });
-
-/**
-*  @Author: cc
-*  @description:  过滤表的 series 数据     过滤出指定日期的数据
-*  @param {   [{2023-01-03: 995.9}] }
-*  @return {  数组数字 [1,2,3] }
-*/
-const filterEchartsDate = (data, startDate, endDate) => {
-  const result = {};
-  for (const date in data) {
-    if (date >= startDate && date <= endDate) {
-      result[date] = data[date];
-    }
-  }
-  return result;
-};
 
 // 在组件销毁时销毁图表
 const destroyChart = () => {
@@ -974,9 +1019,9 @@ const disabledDate = (current) => {
 };
 
 // 截图
-const screenPNG = (tableName, event: Element | any) => {
+const screenPNG = (tableName, event: Element) => {
   // 通过id获取dom
-  const node = event?.target.parentElement.parentElement.parentElement;
+  const node = event.target.parentElement.parentElement.parentElement;
 
   domToImage
     .toPng(node)
@@ -997,6 +1042,13 @@ const screenPNG = (tableName, event: Element | any) => {
       console.error(error);
     });
 };
+
+// 监听数据变化
+watchEffect(() => { });
+
+onBeforeUnmount(() => {
+  destroyChart();
+});
 </script>
 
 <template>
@@ -1007,7 +1059,7 @@ const screenPNG = (tableName, event: Element | any) => {
       <div class="left-name">{{ id }}</div>
       <!-- 下载图片 -->
       <div class="downLoadPng">
-        <a-button type="primary" @click="screenPNG(`${id}`, $event)">导出图片</a-button>
+        <a-button type="primary" @click="screenPNG(`00010040463535（电能表）`, $event)">导出图片</a-button>
       </div>
     </div>
 

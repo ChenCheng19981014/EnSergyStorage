@@ -1,0 +1,11 @@
+.arco-btn {
+    &:hover {
+        color: #fff;
+        background: #94bfff;
+    }
+
+    :active {
+        background: #0e42d2 !important;
+        color: #fff;
+    }
+}
