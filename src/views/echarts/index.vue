@@ -80,6 +80,7 @@ const filterData = (tabelInfo: any[]) => {
 
     // 信息
     const info = { propertyId, InstantaneousActivePower, time };
+    
     // 以资产编号 进行分类
     if (!tableInfoById[propertyId.trim()]) {
       tableInfoById[propertyId.trim()] = {
@@ -99,6 +100,8 @@ const filterData = (tabelInfo: any[]) => {
       return new Date(a.time).getTime() - new Date(b.time).getTime();
     });
   });
+
+  // console.log('tableInfoById:',tableInfoById);
 
   // 添加 先后时间
   Object.keys(tableInfoById).map((id: any) => {

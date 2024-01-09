@@ -78,6 +78,7 @@
   background: #94bfff;
   color: #fff;
   font-size: 14px;
+
   &:hover {
     color: #fff;
     cursor: not-allowed;
@@ -98,6 +99,7 @@
 .upload-submit .can-submit {
   background: #165dff;
   color: #fff;
+
   &:hover {
     color: #fff;
     background: #4080ff;
@@ -106,12 +108,15 @@
 </style>
 
 <script setup lang="ts">
+//npm install iconv-lite
 import { useRouter } from "vue-router";
 import { PiniaTableInfo } from "@/pinia/table";
-import { ref, onMounted, registerRuntimeCompiler } from "vue";
+import { ref, onMounted } from "vue";
 import * as XLSX from "xlsx";
 import { gsap } from "gsap";
 import { Message } from "@arco-design/web-vue";
+import * as  Papa from 'papaparse';
+
 const router = useRouter();
 //文件列表
 const fileList = ref<HTMLInputElement[]>([]);
@@ -125,6 +130,9 @@ const upLoadSuccess = ref(false);
 
 //  导入表格 功能
 const importExcel = (file: HTMLInputElement | any) => {
+  // 传入的文件类型
+  const fileType = file.type;
+
   //  文件存储
   fileList.value.push(file);
   // 取文件名称
@@ -142,11 +150,18 @@ const importExcel = (file: HTMLInputElement | any) => {
       const data = ev.target.result;
 
       const workbook = XLSX.read(data, {
+        raw: true,
         type: "binary",
+        // 1252为默认值，936为中文简体编码
+        codepage: 936,
+        cellText: fileType === 'text/csv', // 强制将字符串转换不不变
+        // codepage: 65001, // 设置编码为 UTF-8
       });
 
       const wsname = workbook.SheetNames[0]; //取第一张表，wb.SheetNames[0]是获取Sheets中第一个Sheet的名字
+
       const ws = XLSX.utils.sheet_to_json(workbook.Sheets[wsname]); //生成json表格内容，wb.Sheets[Sheet名]获取第一个Sheet的数据
+
       const excellist = [] as any; //清空接收数据
 
       //编辑数据
@@ -180,9 +195,18 @@ const importExcel = (file: HTMLInputElement | any) => {
     }
   };
 
-  const blob = new Blob([file], { type: file.type });
+  const blob = new Blob([file], { type: fileType });
+
   // 读取xlsx表格数据
-  fileReader.readAsBinaryString(blob);
+  // fileReader.readAsBinaryString(blob);
+  // fileReader.readAsText(blob, 'gbk');
+
+  // csv格式特殊处理 使用GBK读取文档的方式
+  if (fileType === 'text/csv') {
+    fileReader.readAsText(blob, 'GBK');
+  } else {
+    fileReader.readAsBinaryString(blob);
+  }
 };
 
 // 上传文件 之前
@@ -267,7 +291,9 @@ const uploadData = () => {
   }
 };
 
-onMounted(() => {});
+onMounted(() => {
+
+});
 </script>
 
 <template>
@@ -277,23 +303,13 @@ onMounted(() => {});
 
     <!-- 上传模块 -->
     <div class="upload-arco">
-      <a-upload
-        draggable
-        :multiple="false"
-        :custom-request="customRequest"
-        :on-before-remove="onBeforeRemove"
-        :on-before-upload="onBeforeUpload"
-        @default-file-list="fileList"
-      />
+      <a-upload draggable :multiple="false" :custom-request="customRequest" :on-before-remove="onBeforeRemove"
+        :on-before-upload="onBeforeUpload" @default-file-list="fileList" />
     </div>
 
     <!-- 提交按钮 -->
     <div class="upload-submit">
-      <a-button
-        @click="uploadData"
-        :class="`${upLoadSuccess ? 'can-submit' : 'submit-btn'}`"
-        >生成表单</a-button
-      >
+      <a-button @click="uploadData" :class="`${upLoadSuccess ? 'can-submit' : 'submit-btn'}`">生成表单</a-button>
     </div>
   </div>
 </template>
