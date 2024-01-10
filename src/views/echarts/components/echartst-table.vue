@@ -411,6 +411,8 @@ const showTimeList = ref([
     color: "#33D1C9",
     timeFrame: "07:00～08:00",
     frame: ['07:00:00', '08:00:00']
+    // timeFrame: "12:00～18:00",
+    // frame: ['12:00:00', '18:00:00']
   },
 ]);
 const echarts1 = ref(null); // echatrs1 dom
@@ -442,12 +444,38 @@ let selectedData = reactive({
   data2: [tableInfo?.value.time.startTime, tableInfo?.value.time.endTime],
 });
 
-// 取到表一所需要的数据  使用了以时间为键的reduce方法进行排序
-echarts1Data = tableInfo?.value.data.reduce((acc, obj) => {
+
+const dailyAverages = tableInfo?.value.data.reduce((acc, obj) => {
   const date = obj.time.split(" ")[0]; // 提取日期部分
-  acc[date] = (acc[date] || 0) + parseFloat(obj.InstantaneousActivePower);
+  const value = parseFloat(obj.InstantaneousActivePower);
+
+  // 如果该日期不在累加器中，则初始化计数器和总数
+  if (!acc[date]) {
+    acc[date] = {
+      count: 0,
+      sum: 0,
+    };
+  }
+
+  // 累加总数和计数器
+  acc[date].sum += value;
+  acc[date].count++;
+
   return acc;
 }, {});
+
+for (const date in dailyAverages) {
+  echarts1Data[date] = dailyAverages[date].sum / dailyAverages[date].count;
+}
+
+// // 取到表一所需要的数据  使用了以时间为键的reduce方法进行排序
+// echarts1Data = tableInfo?.value.data.reduce((acc, obj) => {
+//   const date = obj.time.split(" ")[0]; // 提取日期部分
+//   acc[date] = (acc[date] || 0) + parseFloat(obj.InstantaneousActivePower);
+//   return acc;
+// }, {});
+
+// console.log('echarts1Data:',echarts1Data);
 
 // 表一的 配置
 const options1 = reactive<any>({
@@ -636,11 +664,13 @@ const options2 = reactive<any>({
       return [x, y];
     },
     axisPointer: {
-      type: "none",
+      type: "line",
       lineStyle: {
-        color: "#00FFE0",
+        color: "rgb(151,151,151)",
         width: 2,
+        type: "solid",
       },
+      z:-1,
     },
     className: "echarts-tooltip-2",
     formatter: function (params, elOne, elTwo) {
@@ -862,20 +892,19 @@ const getDataByTimeRange = (data, startTime, endTime) => {
   const result = {};
   for (const date in data) {
     const dailyData = data[date];
-    const power = dailyData.reduce((sum, item) => {
+    const timeFilteredData = dailyData.filter(item => {
       const time = item.time.split(" ")[1]; // 提取时间部分
-      const hour = parseInt(time.split(":")[0], 10); // 提取小时数
-
-      if (time >= startTime && time <= endTime) {
-        sum += parseFloat(item.InstantaneousActivePower);
-      }
-      return sum;
-    }, 0);
-
-    result[date] = power;
+      return time >= startTime && time <= endTime;
+    });
+    const values = timeFilteredData.map(item => parseFloat(item.InstantaneousActivePower));
+    const sum = values.reduce((acc, value) => acc + value, 0);
+    const count = timeFilteredData.length;
+    const average = count > 0 ? sum / count : 0;
+    result[date] = average;
   }
   return result;
 }
+
 
 // 确认过滤时间 表一
 const onOk1 = (selectedArr: string[] | any[]) => {
@@ -902,6 +931,7 @@ const onOk2 = (selectedArr: string[] | any[]) => {
   const endDate = selectedArr[1].split(" ")[0]; // 结束时间
 
   Object.keys(echatrsOptionsData).map((timeFrame, index) => {
+
     const dateInfoMap = echatrsOptionsData[timeFrame];
 
     // 过滤出 指定时间内的数据
@@ -965,13 +995,15 @@ const destroyChart = () => {
 const disabledDate = (current) => {
   const currentDate = new Date(current);
   const previousDate = new Date(tableInfo?.value.time.startTime);
+  previousDate.setDate(previousDate.getDate() - 1); // 向前推一天
   const nextDate = new Date(tableInfo?.value.time.endTime);
-
   return (
     currentDate.getTime() < previousDate.getTime() ||
-    currentDate.getTime() > nextDate.getTime()
+    currentDate.getTime() >= nextDate.getTime()
   );
 };
+
+
 
 // 截图
 const screenPNG = (tableName, event: Element | any) => {

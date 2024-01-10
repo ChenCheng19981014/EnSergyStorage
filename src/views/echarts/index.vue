@@ -53,8 +53,9 @@ const messageInfo = ref<Message[]>([
 const company = ref<string>();
 
 // 获取表格数据
-const getExcelInfo = () => {
-  const { tabelInfo } = PiniaTableInfo();
+const getExcelInfo = async () => {
+  const { tableDB } = PiniaTableInfo();
+  const tabelInfo = await tableDB.getItem('ExcelInfo');
   const unit = tabelInfo[0]["管理单位"];
   const powerSupplyStation = tabelInfo[0]["供电所"];
   const userId = tabelInfo[0]["用户编号"];
@@ -65,6 +66,8 @@ const getExcelInfo = () => {
 
   // 筛选表数据
   filterData(tabelInfo);
+
+  // console.log('tabelInfo:',tabelInfo);
 };
 
 // 筛选表数据
@@ -72,6 +75,7 @@ const filterData = (tabelInfo: any[]) => {
 
   // 表格整体信息
   tabelInfo.map((list) => {
+
     const {
       资产编号: propertyId,
       瞬时有功: InstantaneousActivePower,
@@ -80,7 +84,7 @@ const filterData = (tabelInfo: any[]) => {
 
     // 信息
     const info = { propertyId, InstantaneousActivePower, time };
-    
+
     // 以资产编号 进行分类
     if (!tableInfoById[propertyId.trim()]) {
       tableInfoById[propertyId.trim()] = {
@@ -122,7 +126,8 @@ const filterData = (tabelInfo: any[]) => {
       <EchartsMesage :messageInfo="messageInfo"></EchartsMesage>
 
       <!-- echarts表 有几条数据渲染几条 -->
-      <EchartsTable :tableInfo="tableInfo" :id="key" v-for="(tableInfo, key, index) in tableInfoById" :key="'tableInfoById_' + index"></EchartsTable>
+      <EchartsTable :tableInfo="tableInfo" :id="key" v-for="(tableInfo, key, index) in tableInfoById"
+        :key="'tableInfoById_' + index"></EchartsTable>
     </div>
   </div>
 </template>

@@ -1,10 +1,10 @@
 <style scoped lang="scss">
 .picture {
-  width: 665px;
-  height: 741px;
+  // width: 665px;
+  // height: 741px;
   > img {
     width: 100%;
-    height: 100%;
+    height: auto;
   }
 }
 </style>

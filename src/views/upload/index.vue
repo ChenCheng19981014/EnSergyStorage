@@ -3,6 +3,7 @@
   min-width: 1280px;
   height: 100%;
   position: relative;
+
   .index-logo {
     position: absolute;
     top: 60px;
@@ -10,9 +11,12 @@
   }
 
   .index-picture {
+    max-width: 665px;
+    max-height: 741px;
     position: absolute;
     left: 0px;
     bottom: 0px;
+    zoom: 1;
   }
 
   .index-upload {
@@ -35,7 +39,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 
-onMounted(() => {});
+onMounted(() => { });
 </script>
 
 <template>
