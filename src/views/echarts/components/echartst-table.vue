@@ -390,6 +390,8 @@ import {
 import domToImage from "dom-to-image";
 import * as echarts from "echarts";
 import { roundToNearest } from "@/utils/tools.js";
+// @ts-ignore
+import moment from 'moment'
 // 显示的时间
 const showTimeList = ref([
   {
@@ -613,7 +615,7 @@ const options1 = reactive<any>({
 
   series: [
     {
-      smooth:true,
+      smooth: true,
       symbolSize: 5, // 折线点的大小
       showSymbol: false, //关闭线上默认的圆点
       itemStyle: {
@@ -670,7 +672,7 @@ const options2 = reactive<any>({
         width: 2,
         type: "solid",
       },
-      z:-1,
+      z: -1,
     },
     className: "echarts-tooltip-2",
     formatter: function (params, elOne, elTwo) {
@@ -837,7 +839,7 @@ const initEcahrts2Options = (echatrsOptionsData) => {
     const { color, timeFrame } = showTimeList.value[index];
     // 添加颜色和对应的 时间段的数值
     seriesData.push({
-      smooth:true,
+      smooth: true,
       name: timeFrame,
       symbolSize: 5, // 折线点的大小
       showSymbol: false, //关闭线上默认的圆点
@@ -939,7 +941,7 @@ const onOk2 = (selectedArr: string[] | any[]) => {
 
     // 修改echarts2 options series的data值
     options2.series[index].data = Object.values(selectedData);
-  
+
     // 获取x轴最新的数组值  key 日期给x轴
     if (xAxisKey.length > 0) return
 
@@ -977,7 +979,7 @@ onBeforeUnmount(() => {
 const filterEchartsDate = (data, startDate, endDate) => {
   const result = {};
   for (const date in data) {
-    if (date >= startDate && date <= endDate) {
+    if (moment(date).isBetween(startDate, endDate, "day", "[]")) {
       result[date] = data[date];
     }
   }
@@ -1002,8 +1004,6 @@ const disabledDate = (current) => {
     currentDate.getTime() >= nextDate.getTime()
   );
 };
-
-
 
 // 截图
 const screenPNG = (tableName, event: Element | any) => {
