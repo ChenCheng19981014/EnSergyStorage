@@ -115,15 +115,15 @@ import { ref, onMounted } from "vue";
 import * as XLSX from "xlsx";
 import { gsap } from "gsap";
 import { Message } from "@arco-design/web-vue";
-import * as  Papa from 'papaparse';
+
+// 更新表信息
+const { refleshTableInfo } = PiniaTableInfo();
 
 const router = useRouter();
 //文件列表
 const fileList = ref<HTMLInputElement[]>([]);
 // 当前的选中的文件
 const file = ref<HTMLInputElement>();
-// 存储的数据
-const tableInfo = ref(null) as any;
 
 // 上传是否成功
 const upLoadSuccess = ref(false);
@@ -154,7 +154,7 @@ const importExcel = (file: HTMLInputElement | any) => {
         type: "binary",
         // 1252为默认值，936为中文简体编码
         codepage: 936,
-        cellText: fileType === 'text/csv', // 强制将字符串转换不不变
+        cellText: fileType === "text/csv", // 强制将字符串转换不不变
         // codepage: 65001, // 设置编码为 UTF-8
       });
 
@@ -181,11 +181,12 @@ const importExcel = (file: HTMLInputElement | any) => {
         // sheet
       );
 
-      // 更新信息shuju
-      tableInfo.value = excellist;
-
       // 更新 pinia中表的数据
-      PiniaTableInfo().refleshTableInfo(tableInfo.value);
+      refleshTableInfo(excellist);
+
+      // console.log(JSON.stringify(excellist), "excellist");
+
+      // sessionStorage.setItem("PiniaTableInfo", JSON.stringify(excellist));
 
       // console.log("PiniaTableInfo:", PiniaTableInfo);
 
@@ -202,8 +203,8 @@ const importExcel = (file: HTMLInputElement | any) => {
   // fileReader.readAsText(blob, 'gbk');
 
   // csv格式特殊处理 使用GBK读取文档的方式
-  if (fileType === 'text/csv') {
-    fileReader.readAsText(blob, 'GBK');
+  if (fileType === "text/csv") {
+    fileReader.readAsText(blob, "GBK");
   } else {
     fileReader.readAsBinaryString(blob);
   }
@@ -238,7 +239,7 @@ const onBeforeRemove = () => {
 const customRequest = (option) => {
   const { onProgress, onError, onSuccess, fileItem, name } = option;
 
-  console.log("自定义上传请求:", option);
+  // console.log("自定义上传请求:", option);
 
   // 重置 上传按钮的 状态
   upLoadSuccess.value = false;
@@ -291,9 +292,7 @@ const uploadData = () => {
   }
 };
 
-onMounted(() => {
-
-});
+onMounted(() => {});
 </script>
 
 <template>
@@ -303,13 +302,23 @@ onMounted(() => {
 
     <!-- 上传模块 -->
     <div class="upload-arco">
-      <a-upload draggable :multiple="false" :custom-request="customRequest" :on-before-remove="onBeforeRemove"
-        :on-before-upload="onBeforeUpload" @default-file-list="fileList" />
+      <a-upload
+        draggable
+        :multiple="false"
+        :custom-request="customRequest"
+        :on-before-remove="onBeforeRemove"
+        :on-before-upload="onBeforeUpload"
+        @default-file-list="fileList"
+      />
     </div>
 
     <!-- 提交按钮 -->
     <div class="upload-submit">
-      <a-button @click="uploadData" :class="`${upLoadSuccess ? 'can-submit' : 'submit-btn'}`">生成表单</a-button>
+      <a-button
+        @click="uploadData"
+        :class="`${upLoadSuccess ? 'can-submit' : 'submit-btn'}`"
+        >生成表单</a-button
+      >
     </div>
   </div>
 </template>
