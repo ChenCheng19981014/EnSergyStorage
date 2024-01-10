@@ -266,7 +266,7 @@ const customRequest = (option) => {
 
         Message.success({
           id: "upLoadSuccess",
-          content: `上传读取完毕 可提交表单`,
+          content: `文件上传 并解析完毕 可提交表单`,
           duration: 4000,
         });
       },
