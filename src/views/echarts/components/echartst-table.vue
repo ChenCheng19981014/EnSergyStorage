@@ -649,7 +649,6 @@ const options2 = reactive<any>({
   tooltip: {
     trigger: "axis",
     position: function (point, params, dom, rect, size) {
-
       var x = point[0]; // x坐标位置
       var y = point[1]; // y坐标位置
 
@@ -1029,6 +1028,8 @@ const screenPNG = (tableName, event: Element | any) => {
       console.error(error);
     });
 };
+
+
 </script>
 
 <template>
